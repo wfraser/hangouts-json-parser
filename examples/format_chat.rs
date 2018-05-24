@@ -77,7 +77,7 @@ fn main() -> Result<(), io::Error> {
                 }
 
                 for attachment in &message_content.attachments {
-                    combined += &format!("[an attachment: {:?}]", attachment);
+                    combined += &format!("[an attachment: {:#?}]", attachment);
                 }
 
                 combined

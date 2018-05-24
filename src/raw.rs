@@ -189,8 +189,110 @@ pub struct Formatting {
 #[derive(Deserialize, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct AttachmentSegment {
-    pub embed_item: serde_json::Value, // TODO
+    pub embed_item: EmbedItem,
     pub id: String,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct EmbedItem {
+    pub id: Option<String>,
+    pub plus_photo: Option<PlusPhoto>,
+    pub place_v2: Option<PlaceV2>,
+    pub thing_v2: Option<ThingV2>,
+    #[serde(rename="type")] pub types: Vec<String>,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PlusPhoto {
+    pub album_id: String,
+    pub media_type: String,
+    pub original_content_url: String,
+    pub owner_obfuscated_id: String,
+    pub photo_id: String,
+    pub stream_id: Vec<String>,
+    pub thumbnail: Thumbnail,
+    pub url: String,
+    pub download_url: Option<String>,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct Thumbnail {
+    pub height_px: u64,
+    pub width_px: u64,
+    pub image_url: String,
+    pub url: Option<String>,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PlaceV2 {
+    pub url: String,
+    pub name: Option<String>,
+    pub address: Address,
+    pub geo: Geo,
+    pub representative_image: RepresentativeImage,
+    pub place_id: Option<String>,
+    pub cluster_id: Option<String>,
+    pub reference_id: Option<String>,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct Address {
+    #[serde(rename="type", default)] pub types: Vec<String>,
+    pub postal_address_v2: PostalAddressV2,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PostalAddressV2 {
+    pub name: Option<String>,
+    pub street_address: Option<String>,
+    pub address_locality: Option<String>,
+    pub address_region: Option<String>,
+    pub address_country: Option<String>,
+    pub postal_code: Option<String>,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct Geo {
+    #[serde(rename="type", default)] pub types: Vec<String>,
+    pub geo_coordinates_v2: GeoCoordinatesV2,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct GeoCoordinatesV2 {
+    pub latitude: f64,
+    pub longitude: f64,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct RepresentativeImage {
+    #[serde(rename="type")] pub types: Vec<String>,
+    pub id: String,
+    pub image_object_v2: ImageObjectV2,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ImageObjectV2 {
+    pub url: String,
+    pub width: Option<String>,
+    pub height: Option<String>,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct ThingV2 {
+    pub url: String,
+    pub name: Option<String>,
+    pub representative_image: RepresentativeImage,
 }
 
 #[derive(Deserialize, Debug)]
