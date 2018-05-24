@@ -7,3 +7,6 @@ authors = ["Bill Fraser <wfraser@codewise.org>"]
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
+
+[dev_dependencies]
+chrono = "*"
