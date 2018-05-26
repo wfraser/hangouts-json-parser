@@ -93,7 +93,7 @@ fn main() -> Result<(), io::Error> {
             }
         };
 
-        eprintln!("[{}] {}: {}", dt, name, text);
+        println!("[{}] {}: {}", dt, name, text);
     }
 
     Ok(())
