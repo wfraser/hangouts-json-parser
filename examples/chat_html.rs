@@ -2,7 +2,6 @@ extern crate chrono;
 extern crate serde_json;
 extern crate hangouts_json_parser;
 
-use std::char;
 use std::collections::hash_map::*;
 use std::ffi::OsStr;
 use std::fs::File;
@@ -41,59 +40,109 @@ fn parent_path(s: &OsStr) -> Result<PathBuf, io::Error> {
     Ok(canonical)
 }
 
-fn urldecode(s: &str) -> String {
-    let mut res = String::new();
-    let mut number_start = 0;
-    let mut in_percent = false;
+fn urldecode(s: &str) -> Result<String, String> {
+    let mut bytes = vec![];
+    let mut skip = 0;
     for (i, byte) in s.as_bytes().iter().cloned().enumerate() {
-        let c = if byte < 0x80 {
-            byte as char
-        } else {
-            panic!("bad URL (not ASCII)");
-        };
+        if skip > 0 {
+            skip -= 1;
+            continue;
+        }
 
-        if in_percent {
-            if number_start == i - 1 {
-                let num_str = &s[number_start..=i];
-                let n = u32::from_str_radix(num_str, 16)
-                    .expect("bad URL (bad number after %)");
-                let c = char::from_u32(n)
-                    .expect("bad URL (invalid %-encoded character)");
-                res.push(c);
-                in_percent = false;
-            }
-        } else if c == '%' {
-            in_percent = true;
-            number_start = i + 1;
+        if byte == b'%' {
+            let num_str = s.get(i + 1 .. i + 3)
+                .ok_or_else(|| format!("%-encoded character cut short"))?;
+            let n = u8::from_str_radix(num_str, 16)
+                .map_err(|e| format!("invalid %-encoded character: {}", e))?;
+            bytes.push(n);
+            skip = 2;
         } else {
-            res.push(c);
+            bytes.push(byte);
         }
     }
-    res
+
+    String::from_utf8(bytes)
+        .map_err(|e| format!("{}", e))
 }
 
 fn find_local_file(url: &str, base_path: &Path) -> Option<PathBuf> {
     let url_filename = url
         .rsplit_terminator('/')
         .next().unwrap();
-    let filename = urldecode(url_filename);
+    let decoded_filename = urldecode(url_filename)
+        .map_err(|e| {
+            eprintln!("bad URL {:?}: {}", url_filename, e);
+            e
+        })
+        .ok()?;
 
-    let localpath = base_path.join(&filename);
-    if localpath.exists() {
-        Some(localpath)
-    } else {
-        // hack
-        let filename2 = filename.replace('+', " ");
-        let localpath2 = base_path.join(filename2);
-        if localpath2.exists() {
-            Some(localpath2)
+    let mut filename = decoded_filename.clone();
+    let mut localpath = base_path.join(&filename);
+
+    loop {
+        if localpath.exists() {
+            return Some(localpath);
+        }
+
+        if localpath.extension().is_none() {
+            localpath.set_extension("jpg");
+            if localpath.exists() {
+                return Some(localpath);
+            }
+        }
+
+        // Try unwrapping another layer of urlencoding.
+        if let Ok(decoded) = urldecode(&filename) {
+            if decoded == filename {
+                break;
+            }
+            filename = decoded;
+            localpath.set_file_name(&filename);
         } else {
-            None
+            break;
         }
     }
 
-    // TODO: also sometimes the URL is just missing the extension, so check
-    // that too.
+    // Try again, additionally replacing some characters because this is what Google does sometimes.
+    filename = decoded_filename;
+    loop {
+        filename = filename.replace('+', " ");
+        filename = filename.replace('?', "_");
+        localpath.set_file_name(&filename);
+
+        if localpath.exists() {
+            return Some(localpath);
+        }
+
+        if localpath.extension().is_none() {
+            localpath.set_extension("jpg");
+            if localpath.exists() {
+                return Some(localpath);
+            }
+        }
+
+        // Try unwrapping another layer of urlencoding.
+        if let Ok(decoded) = urldecode(&filename) {
+            if decoded == filename {
+                break;
+            }
+            filename = decoded;
+        } else {
+            break;
+        }
+    }
+
+    None
+}
+
+fn file_url(path: &Path) -> String {
+    let s = path.to_str().expect("non-utf8 path");
+    if cfg!(windows) && s.starts_with(r"\\?\") {
+        // Browsers don't like "\\?\" paths; remove the prefix.
+        format!("file:///{}", &s[4..])
+    } else {
+        format!("file:///{}", s)
+    }
 }
 
 fn main() -> Result<(), io::Error> {
@@ -169,12 +218,11 @@ fn main() -> Result<(), io::Error> {
                         if let Some(path) = find_local_file(
                             &photo.url, &base_path)
                         {
-                            println!("<img src=\"{}\"", path.to_string_lossy());
+                            println!("<img src=\"{}\"", file_url(&path));
                         } else {
-                            println!("remote image at <a href=\"{}\">{}</a>",
-                                photo.url, photo.url);
                             println!("<img src=\"{}\"", photo.url);
                         }
+                        // TODO: maybe make a thumbnail: smaller image and link to full one?
                         println!("width=\"100%\"/>");
                     } else {
                         println!("[an attachment: <pre>{:#?}</pre>]", attachment);
