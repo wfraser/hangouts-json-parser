@@ -57,7 +57,7 @@ pub struct SelfConversationState {
     pub invite_affinity: Option<String>,
     pub sort_timestamp: String,
     pub active_timestamp: Option<String>,
-    pub delivery_medium_option: Vec<serde_json::Value>, // TODO
+    pub delivery_medium_option: Option<serde_json::Value>, // TODO
     pub is_guest: Option<bool>,
 }
 
@@ -85,6 +85,7 @@ pub struct ParticipantData {
     pub new_invitation_status: String,
     pub in_different_customer_as_requester: bool,
     pub domain_id: String,
+    pub phone_number: Option<serde_json::Value>, // TODO
 }
 
 #[derive(Deserialize, Debug)]

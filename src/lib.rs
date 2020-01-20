@@ -13,7 +13,7 @@ impl Hangouts {
 
         for convo in &self.conversations {
             for participant in &convo.header.details.participant_data {
-                if let Entry::Vacant(mut entry) = map.entry(participant.id.clone()) {
+                if let Entry::Vacant(entry) = map.entry(participant.id.clone()) {
                     entry.insert(participant.clone());
                 }
             }
