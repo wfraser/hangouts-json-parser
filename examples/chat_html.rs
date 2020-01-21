@@ -1,7 +1,3 @@
-extern crate chrono;
-extern crate serde_json;
-extern crate hangouts_json_parser;
-
 use std::collections::hash_map::*;
 use std::ffi::OsStr;
 use std::fs::File;

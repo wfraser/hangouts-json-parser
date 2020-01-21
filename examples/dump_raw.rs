@@ -1,6 +1,3 @@
-extern crate serde_json;
-extern crate hangouts_json_parser;
-
 use std::fs::File;
 use std::env;
 use std::io::{self, BufReader};

@@ -1,9 +1,9 @@
-extern crate serde;
-extern crate serde_json;
+#![deny(rust_2018_idioms)]
+
 #[macro_use] extern crate serde_derive;
 
 pub mod raw;
-pub use raw::Hangouts;
+pub use crate::raw::Hangouts;
 
 use std::collections::hash_map::*;
 
