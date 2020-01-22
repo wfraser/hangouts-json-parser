@@ -30,3 +30,34 @@ impl raw::EventHeader {
         Ok((secs, usecs * 1_000))
     }
 }
+
+impl raw::Event {
+    pub fn text_only(&self) -> Option<String> {
+        let msg = match self.data {
+            raw::EventData::ChatMessage { ref message_content, .. } => message_content,
+            _ => {
+                return None;
+            }
+        };
+
+        let mut combined = String::new();
+
+        for segment in &msg.segments {
+            match segment {
+                raw::ChatSegment::Text { ref text, formatting: _ } => {
+                    combined += text;
+                }
+                raw::ChatSegment::LineBreak { ref text } => {
+                    if let Some(text) = text {
+                        combined += text;
+                    } else {
+                        combined.push('\n');
+                    }
+                }
+                raw::ChatSegment::Link { .. } => (),
+            }
+        }
+
+        Some(combined)
+    }
+}

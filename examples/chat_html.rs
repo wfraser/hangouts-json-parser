@@ -167,7 +167,7 @@ fn main() -> Result<(), io::Error> {
         .iter_mut()
         .find(|convo|
             convo.header.details.participant_data.iter().any(|p|
-                p.fallback_name == participant_name))
+                p.fallback_name.as_ref() == Some(&participant_name)))
         .unwrap_or_else(|| {
             eprintln!("No matching conversation found with a person named {:?}", participant_name);
             std::process::exit(1);
@@ -175,7 +175,7 @@ fn main() -> Result<(), io::Error> {
 
     let names: HashMap<raw::ParticipantId, String> = convo.header.details.participant_data
         .iter()
-        .map(|p| (p.id.clone(), p.fallback_name.clone()))
+        .map(|p| (p.id.clone(), p.fallback_name.as_deref().unwrap_or("[unknown]").to_owned()))
         .collect();
 
     println!("<!DOCTYPE html>");
@@ -236,6 +236,10 @@ fn main() -> Result<(), io::Error> {
                             hangout_duration_secs);
                     }
                 }
+            }
+
+            raw::EventData::MembershipChange { .. } => {
+                println!("<i>[membership change: {:#?}]</i>", event.data);
             }
         }
         println!("<hr />");

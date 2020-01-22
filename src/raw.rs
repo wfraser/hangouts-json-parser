@@ -25,6 +25,7 @@ pub struct ConversationHeader {
 pub struct ConversationDetails {
     pub id: ConversationId,
     #[serde(rename="type")] pub typ: String,
+    pub name: Option<String>, // set for type="GROUP" only
     pub self_conversation_state: SelfConversationState,
     pub read_state: Vec<ReadState>,
     pub has_active_hangout: bool,
@@ -49,7 +50,7 @@ pub struct ConversationId {
 pub struct SelfConversationState {
     pub self_read_state: ReadState,
     pub status: String,
-    pub notification_level: String,
+    pub notification_level: NotificationLevel,
     pub view: Vec<String>,
     pub inviter_id: ParticipantId,
     pub invite_timestamp: String,
@@ -79,12 +80,12 @@ pub struct ParticipantId {
 #[serde(deny_unknown_fields)]
 pub struct ParticipantData {
     pub id: ParticipantId,
-    pub fallback_name: String,
-    pub invitation_status: String,
-    pub participant_type: String,
-    pub new_invitation_status: String,
-    pub in_different_customer_as_requester: bool,
-    pub domain_id: String,
+    pub fallback_name: Option<String>,
+    pub invitation_status: Option<String>,
+    pub participant_type: Option<String>,
+    pub new_invitation_status: Option<String>,
+    pub in_different_customer_as_requester: Option<bool>,
+    pub domain_id: Option<String>,
     pub phone_number: Option<serde_json::Value>, // TODO
 }
 
@@ -115,7 +116,14 @@ pub struct EventHeader {
 pub struct SelfEventState {
     pub user_id: ParticipantId,
     pub client_generated_id: Option<String>,
-    pub notification_level: String,
+    pub notification_level: Option<NotificationLevel>,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(deny_unknown_fields)]
+pub enum NotificationLevel {
+    #[serde(rename="QUIET")] Quiet,
+    #[serde(rename="RING")] Ring,
 }
 
 #[derive(Deserialize, Debug)]
@@ -133,6 +141,12 @@ pub enum EventData {
         media_type: String,
         participant_id: Vec<ParticipantId>,
     },
+
+    #[serde(rename="membership_change")]
+    MembershipChange {
+        #[serde(rename="type")] typ: String,
+        participant_id: Vec<ParticipantId>,
+    }
 }
 
 #[derive(Deserialize, Debug)]
