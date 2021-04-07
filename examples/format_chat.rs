@@ -91,6 +91,10 @@ fn main() -> Result<(), io::Error> {
             raw::EventData::MembershipChange { .. } => {
                 format!("[membership change: {:#?}]", event.data)
             }
+
+            raw::EventData::ConversationRename { ref old_name, ref new_name } => {
+                format!("[conversation rename from {:?} to {:?}]", old_name, new_name)
+            }
         };
 
         println!("[{}] {}: {}", dt, name, text);

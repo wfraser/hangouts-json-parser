@@ -241,6 +241,10 @@ fn main() -> Result<(), io::Error> {
             raw::EventData::MembershipChange { .. } => {
                 println!("<i>[membership change: {:#?}]</i>", event.data);
             }
+
+            raw::EventData::ConversationRename { ref old_name, ref new_name } => {
+                println!("<i>[conversation renamed from {:?} to {:?}]</i>", old_name, new_name);
+            }
         }
         println!("<hr />");
     }
