@@ -11,3 +11,8 @@ serde_json = "1.0"
 
 [dev_dependencies]
 chrono = "*"
+
+[features]
+default = []
+deny_unknown_fields = []
+strict = ["deny_unknown_fields"]
