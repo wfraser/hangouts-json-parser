@@ -1,5 +1,3 @@
-use serde_json;
-
 #[derive(Deserialize, Debug)]
 #[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
 pub struct Hangouts {

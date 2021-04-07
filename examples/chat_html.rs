@@ -8,7 +8,7 @@ use std::str;
 use hangouts_json_parser::{raw, Hangouts};
 
 fn usage() {
-    eprintln!("usage: {} <json path> <participant name>", env::args().nth(0).unwrap());
+    eprintln!("usage: {} <json path> <participant name>", env::args().next().unwrap());
 }
 
 fn chrono(parts: Result<(i64, u32), std::num::ParseIntError>) -> chrono::DateTime<chrono::Utc> {
@@ -47,7 +47,7 @@ fn urldecode(s: &str) -> Result<String, String> {
 
         if byte == b'%' {
             let num_str = s.get(i + 1 .. i + 3)
-                .ok_or_else(|| format!("%-encoded character cut short"))?;
+                .ok_or("%-encoded character cut short")?;
             let n = u8::from_str_radix(num_str, 16)
                 .map_err(|e| format!("invalid %-encoded character: {}", e))?;
             bytes.push(n);

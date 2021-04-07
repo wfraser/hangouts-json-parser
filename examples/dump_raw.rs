@@ -7,7 +7,7 @@ fn main() -> Result<(), io::Error> {
     let input = if let Some(path) = env::args_os().nth(1) {
         BufReader::new(File::open(path)?)
     } else {
-        eprintln!("usage: {} <path>", env::args().nth(0).unwrap());
+        eprintln!("usage: {} <path>", env::args().next().unwrap());
         std::process::exit(1);
     };
 

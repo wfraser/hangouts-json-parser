@@ -5,7 +5,7 @@ use std::io::{self, BufReader};
 use hangouts_json_parser::{raw, Hangouts};
 
 fn usage() {
-    eprintln!("usage: {} <json path> <participant name>", env::args().nth(0).unwrap());
+    eprintln!("usage: {} <json path> <participant name>", env::args().next().unwrap());
 }
 
 fn chrono(parts: Result<(i64, u32), std::num::ParseIntError>) -> chrono::DateTime<chrono::Utc> {
