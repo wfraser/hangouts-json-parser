@@ -36,6 +36,7 @@ pub struct ConversationDetails {
     pub fork_on_external_invite: bool,
     pub network_type: Vec<String>,
     pub force_history_state: String,
+    pub conversation_ttl_days: Option<String>,
     pub group_link_sharing_status: String
 }
 
@@ -85,6 +86,7 @@ pub struct ParticipantData {
     pub participant_type: Option<String>,
     pub new_invitation_status: Option<String>,
     pub in_different_customer_as_requester: Option<bool>,
+    pub is_anonymous_phone: Option<bool>,
     pub domain_id: Option<String>,
     pub phone_number: Option<serde_json::Value>, // TODO
 }
@@ -135,11 +137,17 @@ pub enum EventData {
         annotation: Option<Vec<Annotation>>,
     },
 
+    #[serde(rename="conversation_rename")]
+    ConversationRename {
+        old_name: String,
+        new_name: String,
+    },
+
     #[serde(rename="hangout_event")]
     HangoutEvent {
         #[serde(flatten)] data: HangoutEvent,
-        media_type: String,
-        participant_id: Vec<ParticipantId>,
+        media_type: Option<String>,
+        #[serde(default)] participant_id: Vec<ParticipantId>,
     },
 
     #[serde(rename="membership_change")]
@@ -213,6 +221,7 @@ pub struct AttachmentSegment {
 pub struct EmbedItem {
     pub id: Option<String>,
     pub plus_photo: Option<PlusPhoto>,
+    pub plus_audio_v2: Option<PlusAudioV2>,
     pub place_v2: Option<PlaceV2>,
     pub thing_v2: Option<ThingV2>,
     #[serde(rename="type")] pub types: Vec<String>,
@@ -223,8 +232,8 @@ pub struct EmbedItem {
 pub struct PlusPhoto {
     pub album_id: String,
     pub media_type: String,
-    pub original_content_url: String,
-    pub owner_obfuscated_id: String,
+    pub original_content_url: Option<String>,
+    pub owner_obfuscated_id: Option<String>,
     pub photo_id: String,
     pub stream_id: Vec<String>,
     pub thumbnail: Thumbnail,
@@ -252,6 +261,18 @@ pub struct PlaceV2 {
     pub place_id: Option<String>,
     pub cluster_id: Option<String>,
     pub reference_id: Option<String>,
+}
+
+#[derive(Deserialize, Debug)]
+#[cfg_attr(feature = "deny_unknown_fields", serde(deny_unknown_fields))]
+pub struct PlusAudioV2 {
+    pub album_id: String,
+    pub duration: String,
+    pub embed_url: String,
+    pub media_key: String,
+    pub owner_obfuscated_id: Option<String>,
+    pub photo_id: String,
+    pub url: String,
 }
 
 #[derive(Deserialize, Debug)]
